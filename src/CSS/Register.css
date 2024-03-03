@@ -1,0 +1,126 @@
+/* App.css */
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden; /* Prevent scrollbars on the body */
+  }
+  .LoginContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .LoginBox {
+    width: 400px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .LoginBox h1 {
+    margin-bottom: 20px;
+  }
+  
+  .LoginBox img {
+    height: 300px;
+    width: 300px;
+  }
+  
+  .LoginBox input {
+    margin-bottom: 20px;
+    height: 40px;
+    padding: 10px;
+  }
+  
+  .LoginBox button {
+    height: 40px;
+    padding: 10px;
+    border: none;
+  }
+  
+  .LoginBox p{
+    color: grey;
+  }
+  
+  
+  
+  .RegisterContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: aliceblue;
+  }
+  
+  .RegisterAnim {
+    height: 700px;
+    width: 900px;
+  }
+  
+  .RegisterBoxMain {
+    width: 500px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    padding: 100px;
+  
+  }
+  
+  .RegisterBoxMain img {
+      height: 100px;
+      width: 100px;
+  }
+  
+  
+  .RegisterBox {
+    height: auto;
+    display: flex;
+    flex-direction: row;
+  }
+  
+  
+  
+  .RegisterBoxChild{
+    display: flex;
+    flex-direction: column;
+    justify-content:flex-start;
+    align-items: flex-start;
+  }
+  
+  .RegisterBoxChild input {
+    margin: 5px;
+  }
+  
+  .RegisterBoxChild h1 {
+    margin-bottom: 20px;
+  }
+  
+  .RegisterBoxChild input {
+    margin-bottom: 10px;
+    width: 200px;
+    height: 30px;
+    padding: 10px;
+  }
+  
+  .RButton {
+    height: 40px;
+    width:200px;
+    padding: 10px;
+    border: none;
+  }
+  
+  
+  .checkbox-container {
+    display: flex;
+    flex-direction: row;
+    justify-content:flex-start;
+    align-items: flex-start;
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }

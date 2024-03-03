@@ -1,0 +1,122 @@
+body {
+    margin: 0;
+    padding: 0;
+  }
+
+.DashboardContainer{
+    display: flex;
+    flex-direction: row;   
+    
+}
+
+
+.DashboardBox{
+    display: flex;
+    flex-direction: column;
+   margin-right: 50px;
+    
+}
+
+.GreetingContainer{
+    background-color: rgb(172, 216, 163);
+    border-radius: 20px;
+    color: white;
+    padding: 15px;
+    display: flex;
+    flex-direction: row;
+    height: 150px;
+    width: 700px;
+}
+
+.GreetingContainerChild{
+    display: flex;
+    flex-direction: column;
+    height: 50px;
+    width: 800px;
+    margin: 0px;
+}
+
+
+.GreetingAnimation {
+    width: 100%; /* This makes the animation fill the container*/
+    max-width: 200px; /* Max Width for animation */
+  }
+
+.GreetingContainerChild h1{
+    margin-bottom: 0px;
+}
+
+.WhiteContainer{
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 30px;
+    margin-right: 20px;
+}
+
+
+.ChartBoxes{
+    display: flex;
+    margin-top: 30px;
+    flex-direction: column;
+}
+
+.ChartBoxesChild{
+    display: flex;
+    flex-direction: row;
+    margin-top: 20px;
+}
+
+.RowBoxes{
+    display: flex;
+    flex-direction: row;
+    margin-top: 20px;
+    height: 100vh;
+    overflow: scroll;
+    position: fixed;
+    top: 0;
+    left: 300px;
+    padding-left: 30px;
+    right: 0;
+    overflow-x: hidden;
+
+}
+
+.ActivityContainer{
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 30px;
+    margin-left: 10px;
+    margin-top: 15px;
+    height: 560px;
+    align-items: center;
+    width: 300px;
+    background-color: aliceblue;
+}
+
+
+.CourseContainer{
+    background-color: rgb(172, 216, 163);
+    border-radius: 20px;
+    background-color: gr;
+    padding: 10px;
+    width: 250px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
+.ColumnBoxes{
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    margin: 40px;
+}
+
+
+.NotificationBlock{
+    border-radius: 20px;
+    background-color: whitesmoke;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+
