@@ -20,8 +20,6 @@ function Registration() {
 
   const HandleRegister = async () => {
     const Role = "Student";
-    console.log("Password:", Password);
-  console.log("ConfirmPassword:", ConfirmPassword);
     
     if(Password === ConfirmPassword){
     try {
@@ -37,6 +35,7 @@ function Registration() {
       );
   
       if (response.data.success) {
+        document.cookie = `token=${response.data.token}`
         navigate("/CourseSelect");
       }
     } catch (error) {

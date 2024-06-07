@@ -1,131 +1,238 @@
-import React, { useState, useEffect,useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ReactPlayer from 'react-player';
-import { pdfjs } from 'react-pdf';
-import PdfViewer from './ReuseableComponents/PdfViewer';
+import Collapsible from 'react-collapsible';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
+import { useNavigate, useParams } from 'react-router-dom';
+import {checkAuth} from './FunctionReused/checkAuth.js'
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.js',
-  import.meta.url,
-).toString();
-
-const ToggleContainer = () => {
-  const [isContainerVisible, setContainerVisibility] = useState(false);
-
-  //------------------------------------------------------------
-  const [played, setPlayed] = useState(0);
+function LearningMaterial() {
+  const [played, setPlayed] = useState(0.0);
+  const [selectedContentID, setSelectedContentID] = useState(null);
   const playerRef = useRef(null);
-  const [totalDuration, setTotalDuration] = useState(0);
+  const [isVideoView, setVideoView] = useState(false);
+  const [isSlideOpen, setSlideOpen] = useState(false);
+  const [purchased, setPurchased] = useState(false);
+  const [coltri, setcoltri] = useState(false);
+  const [loading, setLoading] = useState(true); 
+  const [learningMaterials, setLearningMaterials] = useState([]);
+  const nav = useNavigate();
+  const { courseId, contentID, prog } = useParams();
 
   useEffect(() => {
-    const storedPlayed = localStorage.getItem('videoPlayed');
-    if (storedPlayed) {
-      setPlayed(parseFloat(storedPlayed));
+    async function verifySession() {
+        const isAuthenticated = await checkAuth();
+        if (!isAuthenticated) {
+          nav('/login');
+        }
     }
-  }, []);
+    verifySession();
+}, []);
+
+
+useEffect(() => {
+  const checkEnrollment = async () => {
+    try {
+        const axiosInstance = axios.create({
+          baseURL: 'http://localhost:3001',
+          withCredentials: true 
+      });
+      const response = await axiosInstance.post('/CheckEnrollment', { courseID: courseId });
+      console.log("Enrollment Check Response:", response.data); // Log the response data
+      if (response.data.success && response.data.enrolled) {
+        console.log("User is enrolled"); // Log if user is enrolled
+        setPurchased(true);
+      } else {
+        console.log("User is not enrolled"); // Log if user is not enrolled
+      }
+    } catch (error) {
+      console.error("Error checking enrollment:", error);
+    } finally {
+      setLoading(false); // Set loading to false after enrollment check completes
+    }
+  };
+
+  checkEnrollment();
+}, [courseId]);
+
+useEffect(() => {
+  if (!loading && !purchased) { // Navigate only after loading is complete and purchased is true
+    nav("/BrowseCourses");
+  }
+}, [loading, purchased, nav]);
+
+
+  useEffect(() => {
+    fetchLearningMaterials();
+    if (!coltri){
+    if (contentID) {
+      const selectedMaterial = learningMaterials.find(material => material.contentID === contentID);
+      if (selectedMaterial) {
+        handleVideoClick("kotlin",contentID)
+        setcoltri(true);
+      }
+    }
+  }
+  }, [contentID]);
+
+  const fetchLearningMaterials = async () => {
+    try {
+      const response = await axios.post('http://localhost:3001/LearningMaterials', {
+        courseID: courseId
+      });
+      const materials = response.data.data;
+      setLearningMaterials(materials);
+      console.log(materials)
+      
+    } catch (error) {
+      console.error('Error fetching learning materials:', error);
+    }
+  };
+
+  const handleVideoClick = (title, contentID) => {
+    setVideoView(true);
+    setSlideOpen(false);
+    setSelectedContentID(contentID);
+  };
+
+  const handleSlidesClick = (slidesURL) => {
+    setVideoView(false); // Ensure that video view is set to false when slides are clicked
+    const link = document.createElement('a');
+    link.href = slidesURL;
+    link.download = 'slides.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleProgress = (progress) => {
-    // Update the played state and localStorage
     setPlayed(progress.played);
-    localStorage.setItem('videoPlayed', progress.played.toString());
   };
 
-  const handleReady = () => {
-    // Get the reference to the ReactPlayer component
-    const player = playerRef.current;
+  const handleSeek = (progress) => {
+    setPlayed(progress.played);
+  };
 
-    // Set the playback position using the stored played value
-    if (player) {
-      player.seekTo(played);
+  const handleReady = (contentID) => {
+    return () => {
+      const material = learningMaterials.find((material) => material.contentID === contentID);
+      const player = playerRef.current;
+      if (material && player && !player.getCurrentTime()) {
+        const seekTime = parseFloat(prog); // Convert prog to a float
+        if (!isNaN(seekTime) && isFinite(seekTime)) {
+          if (material.contentID === selectedContentID) { // Check if this is the selected content
+            player.seekTo(seekTime); // Set the seek time for the selected content
+            setPlayed(seekTime); // Set the initial progress
+          }
+        } else {
+          console.error('Invalid seek time:', prog);
+        }
+      }
+    };
+  };
+
+  const insertProgression = async (progress) => {
+    try {
+      const material = learningMaterials.find(material => material.contentID === selectedContentID);
+      if (!material) {
+        console.error('Selected material not found.');
+        return;
+      }
+      
+      const contentID = material.contentID;
+
+      const axiosInstance = axios.create({
+        baseURL: 'http://localhost:3001',
+        withCredentials: true 
+    });
+  
+      await axiosInstance.post('/InsertProgress', {
+        CourseName: material.contentTitle,
+        contentID: contentID,
+        Progress: progress,
+        courseID : courseId
+      });
+
+    } catch (error) {
+      console.error('Error inserting progression data:', error);
     }
-  };
-
-  const handleDuration = (duration) => {
-    setTotalDuration(duration);
-  };
-
-
-  /*const convertToMinutes = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-  }; 
-  console.log("Total Progression is " + convertToMinutes(played) + " out of " + convertToMinutes(totalDuration));*/
-
-//-------------------------------------------------------------------------------
-
-  const[isVideoView , setVideoView] = useState(false)
-  const[isSlideOpen , setSetSlide] = useState(false)
-
-  const OpenPlayer = ()=>{
-    setVideoView(!isVideoView)
-    setSetSlide(false)
-  }
-
-  const OpenSlide = ()=>{
-    setSetSlide(!isSlideOpen)
-    setVideoView(false)
-  }
-
-  const toggleContainer = () => {
-    setContainerVisibility(!isContainerVisible);
   };
 
   return (
     <div className="flex items-start justify-start">
-    <div className='w-[400px] h-screen border border-gray'>
-        <div className='flex p-5 flex-col bg-black text-white'>
-            <p>Mobile Application</p>
-            <h1 className='text-2xl'>Learning Material</h1>
+      <div className="w-[400px] h-screen border border-gray">
+        <div className="flex p-5 flex-col bg-black text-white">
+          <p>Topics</p>
+          <h1 className="text-2xl">Learning Material</h1>
         </div>
-      <div className="flex flex-col bg-white p-2 border cursor-pointer">
-      <div className="flex bg-white p-2 rounded-md border">
-        <h1 className="text-lg mr-8 font-bold mb-4">Kotlin Programming</h1>
-        <span onClick={toggleContainer} className="mr-2">&#9662;</span>
-       </div>
 
-        {isContainerVisible && (
-          <div className="mt-4">
-            <div onClick={OpenPlayer} className="bg-gray-300 p-4 mb-2 rounded-md">Videos</div>
-            <div onClick={OpenSlide} className="bg-gray-300 p-4 mb-2 rounded-md">Slides</div>
+        {learningMaterials.map((materials, index) => (
+  <Collapsible
+    key={index}
+    className="border"
+    trigger={
+      <div
+        className={`flex items-center p-7 ${materials.contentID === selectedContentID ? 'bg-gray' : 'bg-white'}`}
+        onClick={() => {handleVideoClick(materials.contentTitle, materials.contentID); setcoltri(true)}}
+      >
+        <span className="font-bold text-lg">{materials.contentTitle}</span>
+        <FontAwesomeIcon icon={faAngleDown} className="ml-6" />
+      </div>
+    }
+    triggerWhenOpen={
+      <div className="flex items-center p-7">
+        <span className="font-bold text-lg">{materials.contentTitle}</span>
+        <FontAwesomeIcon icon={faAngleDown} className="ml-6 transform rotate-180" />
+      </div>
+    }
+    open={materials.contentID === selectedContentID} 
+  >
+    <div
+      onClick={() => handleVideoClick(materials.contentTitle, materials.contentID)}
+      className={`p-7 border cursor-pointer ${isVideoView ? 'bg-gray' : 'bg-white'}`}
+    >
+      Videos
+    </div>
+    <div
+      onClick={() => handleSlidesClick(`http://localhost:3001/${materials.contentURL}`)}
+      className={`p-7 border cursor-pointer ${isSlideOpen ? 'bg-gray' : 'bg-white'}`}
+    >
+      Download Slides
+    </div>
+  </Collapsible>
+))}
+
+      </div>
+
+      <div className="flex flex-col w-full bg-gblue h-screen">
+        <div className="flex p-5 flex-col bg-white shadow-lg">
+          <p className="cursor-pointer" onClick={() => {nav(`/ModuleShow/${courseId}`) ; insertProgression(played)} }>
+            Save Progression and Back
+          </p>
+        </div>
+
+        {isVideoView && (
+          <div className="flex flex-col item-center justify-center mt-24 ml-32">
+            {learningMaterials.map((materials, index) => (
+              <div key={index} style={{ display: materials.contentID === selectedContentID ? 'block' : 'none' }}>
+                <ReactPlayer
+                  ref={playerRef}
+                  url={`http://localhost:3001/${materials.videoURL}`}
+                  width="90%"
+                  height="500px"
+                  controls={true}
+                  onProgress={handleProgress}
+                  onReady={handleReady(materials.contentID)}
+                  onSeek={handleSeek}
+                />
+              </div>
+            ))}
           </div>
-        )}
+        )} 
       </div>
     </div>
-
-   <div className='flex flex-col w-full bg-gblue h-screen'>
-   
-    <div className='flex p-5 flex-col bg-white shadow-lg border'>
-            <p>Back</p>    
-    </div>
-    
-
-    { isVideoView && (
-    <div className='flex flex-col item-center justify-center mt-24 ml-32'>
-       
-      <ReactPlayer
-        ref={playerRef}
-        url="https://www.youtube.com/watch?v=xT8oP0wy-A0"
-        width="90%"
-        height="500px"
-        controls={true}
-        onProgress={handleProgress}
-        onReady={handleReady}
-        onDuration={handleDuration}
-      />
-
-    </div> 
-)}  
-
-{ isSlideOpen &&
-    <div>
-    <PdfViewer/>
-    </div> 
-}
-</div>
-
-
-    </div>
   );
-};
+}
 
-export default ToggleContainer;
+export default LearningMaterial;

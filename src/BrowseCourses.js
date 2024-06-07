@@ -1,107 +1,189 @@
-import React, { useState ,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import NavigationSideBar from './ReuseableComponents/NavigationSideBar';
-import CourseImage from "./Image/Mobile.jpg";
-import filterCoursesByKeyword from './FunctionReused/FilterCoursesByKeyword';
-import recommendTopCourses from './FunctionReused/TopCourses';
 import CoursesSlider from './ReuseableComponents/CoursesSlider';
 import ImageSlider from './ReuseableComponents/ImageSlider';
+import VideoProgressionView from './VideoProgrssionView';
+import axios from 'axios';
+import ChangeInterest from './ChangeInterest';
+import { checkAuth } from './FunctionReused/checkAuth.js';
+import { useNavigate } from 'react-router-dom';
 
 export default function BrowseCourses() {
   const [searchResults, setSearchResults] = useState('');
+  const [courses, setCourses] = useState([]);
+  const [searchcourses, setSearchCourses] = useState([]);
+  const [ChangeView, setChangeView] = useState(false);
+  const [reloadCourses, setReloadCourses] = useState(false); 
+  const navigate = useNavigate();
+  const [courseProgression, setCourseProgression] = useState([]);
 
   useEffect(() => {
-  // Load search results from LocalStorage on component mount
-  const savedSearchResults = localStorage.getItem('searchResults');
-  if (savedSearchResults) {
-    setSearchResults(savedSearchResults);
+    const fetchProgression = async () => {
+      try {
+        const axiosInstance = axios.create({
+          baseURL: 'http://localhost:3001',
+          withCredentials: true 
+        });
+        const response = await axiosInstance.post('/ViewModuleProgress', {});
+        console.log('Progression data response:', response.data.data); // Log the response data
+
+        // Ensure response.data is wrapped in an array if it's an object
+        if (response.data) {
+          const progressionData = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
+          setCourseProgression(progressionData);
+          console.log('Set courseProgression:', progressionData); // Log the set data
+        } else {
+          console.error('Unexpected response data:', response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching progression data:', error);
+      }
+    };
+
+    fetchProgression(); // Call the function to fetch progression data
+  }, []);
+
+  const fetchTopCoursesOnInterest = async () => {
+    try {
+      const response = await axios.post('http://localhost:3001/TopTenEnrollementCourses', null, {
+        withCredentials: true,
+      });
+
+      if (response.status === 200) {
+        const coursesData = response.data.data[0];
+        setCourses(coursesData);
+      }
+    } catch (error) {
+      console.error('Error fetching other data:', error);
+      console.log("Connected");
+    }
+  };
+
+  const fetchSearchCourses = async (keyword) => {
+    try {
+      const response = await axios.post("http://localhost:3001/Search", { keyword });
+      if (response.status === 200) {
+        setSearchCourses(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
-}, []);
 
+  useEffect(() => {
+    async function verifySession() {
+      const isAuthenticated = await checkAuth();
+      if (!isAuthenticated) {
+        navigate('/login');
+      }
+    }
+    verifySession();
+  }, []);
 
-// Course dataset will be replaced by database and backned
-  const courses = [
-    { id: 1, image: CourseImage, title: "Android Mobile App Development", description: "This is a description", enrollments: 100, ratings: [4.5, 4.7, 4.2]  },
-    { id: 2, image: CourseImage, title: "Swift", description: "This is a second description", enrollments: 80, ratings: [4.0, 4.2, 3.8] },
-    { id: 3, image: CourseImage, title: "Kotlin", description: "This is a third description", enrollments: 20, ratings: [4.0, 4.8, 3.8] },
-    { id: 4, image: CourseImage, title: "Flutter", description: "This is a fourth description", enrollments: 50, ratings: [4.0, 4.2, 3.8] },
-    { id: 5, image: CourseImage, title: "Flutter and Dart", description: "This is a fifth description", enrollments: 50, ratings: [4.0, 4.2, 3.8] },
-  ];
+  useEffect(() => {
+    fetchTopCoursesOnInterest();
+    const savedSearchResults = localStorage.getItem('searchKeyword');
+    if (savedSearchResults) {
+      setSearchResults(savedSearchResults);
+      fetchSearchCourses(savedSearchResults);
+    }
+  }, [reloadCourses]); 
 
-
-
-  // suggest top 4 courses based on enrollments count
-  const topCourses = recommendTopCourses(courses, 4);
-
-  // Then showed in the slider 
   const sliderClick = (index) => {
     console.log(`Slide clicked: ${index}`);
   };
 
-  const slides = topCourses.map(Topcourse => ({
-    id: Topcourse.id,
-    image: Topcourse.image,
-    title: Topcourse.title,
-    description: Topcourse.description,
-    enrollments:Topcourse.enrollments,
-    rating: Topcourse.ratings,
-    clickEvent: sliderClick,
-  }));
+  const groupCoursesByCategory = () => {
+    const groupedCourses = {};
+    courses.forEach((course) => {
+      const category = course.courseCategory;
+      if (!groupedCourses[category]) {
+        groupedCourses[category] = [];
+      }
+      groupedCourses[category].push({
+        id: course.courseId,
+        image: course.courseImage,
+        title: course.courseName,
+        description: course.courseCategory,
+        enrollments: course.studentEnrolled,
+        rating: course.courseRating,
+        clickEvent: sliderClick,
+      });
+    });
+    return groupedCourses;
+  };
 
-  //========================================================================
-  
-  // Dont forget this the interst can change
-  // Other show based on his enrollments
-  // and other other developement topic which he might be interested in show topics 
-  
-  // This populated or show filtered courses in block
-  const filteredCourses = filterCoursesByKeyword(searchResults); // the search result over here is coming from local host
+  const handleCloseChangeView = () => {
+    setChangeView(false);
+    setReloadCourses(prev => !prev); 
+  };
 
-  const renderFilteredCourses = () => {
-    return filteredCourses.map((filteredcourse) => (
-      <div key={filteredcourse.id} className='rounded-lg shadow-lg border p-5 min-w-[350px] max-w-[350px]'>
-        <img className='rounded-lg' src={filteredcourse.image} alt={filteredcourse.title} />
-        <h3 className='mt-2 font-bold text-lg'>{filteredcourse.title}</h3>
-        <p>{filteredcourse.description}</p>
-        {/* ... rest of course information rendering */}
+  const renderCoursesByCategory = () => {
+    const groupedCourses = groupCoursesByCategory();
+
+    return Object.keys(groupedCourses).map((category) => (
+      <div key={category}>
+        <h1 className='text-2xl font-bold mt-10'>{`Popular Courses in ${category}`}</h1>
+        <div className='mt-5'>
+          <CoursesSlider slides={groupedCourses[category]} />
+        </div>
       </div>
     ));
   };
 
-
-
-
+  const renderFilteredCourses = () => {
+    return (
+      <div className='mt-5'>
+        <CoursesSlider slides={searchcourses.map(course => ({
+          id: course.courseID,
+          image: course.courseImage,
+          title: course.courseName,
+          description: course.courseCategory,
+          enrollments: course.studentEnrolled,
+          rating: course.courseRating,
+          clickEvent: sliderClick,
+        }))} />
+      </div>
+    );
+  };
 
   return (
     <div className='flex flex-col item-center w-auto justify-center m-5 overflow-hidden'>
-        <NavigationSideBar/>
+      <NavigationSideBar />
 
-        <div className='mr-10 ml-10 mt-10'>
-             <ImageSlider/>
-        </div>
+      <div className='mr-10 ml-10 mt-10'>
+        <ImageSlider />
+      </div>
 
+      {Array.isArray(courseProgression) && courseProgression.length > 0 && (
         <div className='mt-10 w-full p-5'>
-          <h1 className='text-2xl font-bold'>Popular Courses in Mobile Development</h1>
-          <div className='mt-5'>
-            <CoursesSlider slides={slides}/>
+          <h1 className='text-2xl font-bold'>Continue Learning</h1>
+          <div className='flex flex-row'>
+            {courseProgression.map((bar, index) => (
+              <div key={index}>
+                <VideoProgressionView data={bar} />
+              </div>
+            ))}
           </div>
         </div>
+      )}
 
-
+      {searchResults && (
         <div className='mt-10 w-full p-5'>
-        <h1 className='text-2xl font-bold'>Because you searched "{searchResults}"</h1>
-        <div className='mt-5 flex flex-row space-x-8 w-full overflow-x-auto'>
-        {searchResults.length > 0 ? (
-            renderFilteredCourses()
-          ) : (
-            <p>No results found</p>
-          )}
+          <h1 className='text-2xl font-bold'>{`Because you searched "${searchResults}"`}</h1>
+          <div>{renderFilteredCourses()}</div>
         </div>
-        </div>
+      )}
 
-  
+      <div className='mt-5 w-full p-5'>
+        <h1 className='text-4xl font-bold'>These are top suggestions based on your interest.</h1>
+        <button onClick={() => setChangeView(true)} className='mt-4 p-3 bg-gray rounded'>Update and Change topic</button>
+        {renderCoursesByCategory()}
+      </div>
 
-
-
+      {ChangeView && (
+        <ChangeInterest handleCloseChangeView={handleCloseChangeView} />
+      )}
     </div>
   );
 }

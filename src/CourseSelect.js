@@ -1,24 +1,37 @@
 import  Axios  from 'axios';
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {checkAuth} from './FunctionReused/checkAuth.js'
+import axios from 'axios';
 
 
 const CustomSelectionBox = () => {
-
-  const options = ['Mobile Development', 'Web Development', 'Software Testing', 'Programming Languages','Database Design'];
+  const options = ['Mobile App Development', 'Web Development', 'Software Testing', 'Programming Languages','Database Design'];
   const [SelectedOptions, setSelectedOptions] = useState([]);
   const navigate = useNavigate()
   const [error , setError]= useState('');
 
+  useEffect(() => {
+    async function verifySession() {
+        const isAuthenticated = await checkAuth();
+        if (!isAuthenticated) {
+            navigate('/login');
+        }
+    }
+    verifySession();
+}, []);
+
+
+
+
 
    const HandleSaveInterst = async()=>{
-    
+    const axiosInstance = axios.create({
+      baseURL: 'http://localhost:3001',
+      withCredentials: true 
+  });
          try {
-          const response = await Axios.post("http://localhost:3001/SaveInterst",
-          {
-            SelectedOptions,
-          }
-          )
+          const response = await axiosInstance.post("/SaveInterst",{SelectedOptions})
 
           if (response.data.success){
              navigate('/BrowseCourses')
@@ -61,6 +74,10 @@ const CustomSelectionBox = () => {
       </div>
 
       <button onClick={HandleSaveInterst} className="w-40 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-10">Next</button>
+      
+      {error === '' ? null : (
+          <p className="p-5 mt-5 mb-5 bg-red-500 text-white rounded">{error}</p>
+        )}
 
     </div>
   );

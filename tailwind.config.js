@@ -12,6 +12,8 @@ module.exports = {
         'aliceblue': '#F0F8FF',
         'palegreen': '#acd8a3',
         'gray':'#ededed',
+        'LightGray':'#F6F6F6',
+        'RedLight':'#AC4747'
         // Add other colors as needed
       },
     },

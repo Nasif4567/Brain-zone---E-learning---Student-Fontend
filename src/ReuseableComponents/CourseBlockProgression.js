@@ -1,6 +1,7 @@
 import React from 'react'
 import SliderImg1 from '../Image/SliderImg1.jpg'
 import 'font-awesome/css/font-awesome.min.css'; // Import Font Awesome styles
+import Rating from 'react-rating';
 
 export default function CourseBlockProgression() {
   return (
