@@ -1,4 +1,4 @@
-## Screenshot of the student portal
+## Screenshot of the student portal - ( Note same images are used just for demo but can be changed in teacher's system)
 
 ### `login page`
 ![Screenshot](https://github.com/Nasif4567/Brain-zone---E-learning---Student-Fontend/blob/master/public/Image/screen-login.png)
@@ -15,7 +15,7 @@
 ![Screenshot](https://github.com/Nasif4567/Brain-zone---E-learning---Student-Fontend/blob/master/public/Image/Screenshot%202024-05-04%20054145.png)
 
 
-### `Browser Recommedation based on search and interest the image for course is just for demo but can be chnaged in admin system`
+### `Browser Recommedation based on search and interest the image for course is just for demo but can be chnaged in teacher's system`
 ![Screenshot](https://github.com/Nasif4567/Brain-zone---E-learning---Student-Fontend/blob/master/public/Image/search%20recom.png)
 ![Screenshot](https://github.com/Nasif4567/Brain-zone---E-learning---Student-Fontend/blob/master/public/Image/browse-course.png)
 
