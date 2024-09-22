@@ -1,3 +1,5 @@
+## Screenshot of the student portal
+![Screenshot](./screenshot.png)
 
 ## To run this application
 
