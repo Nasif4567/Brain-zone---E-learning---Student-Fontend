@@ -1,5 +1,5 @@
 ## Screenshot of the student portal
-![Screenshot](./screenshot.png)
+![Screenshot](https://github.com/Nasif4567/Brain-zone---E-learning---Student-Fontend/blob/master/public/Image/screen-login.png)
 
 ## To run this application
 
