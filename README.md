@@ -2,7 +2,7 @@
 
 
 
-[Backend of this application can be found here clik to navigate](https://github.com/Nasif4567/Brain-zone-e-Learning-StudentBackend)
+[Backend of this application can be found here click to navigate](https://github.com/Nasif4567/Brain-zone-e-Learning-StudentBackend)
 
 
 ### `login page`
