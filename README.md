@@ -10,7 +10,7 @@
 ![Screenshot](https://github.com/Nasif4567/Brain-zone---E-learning---Student-Fontend/blob/master/public/Image/interested%20in.png)
 
 
-### `search engine with recommedation and search raked page`
+### `search engine with recommedation and search rakend page`
 ![Screenshot](https://github.com/Nasif4567/Brain-zone---E-learning---Student-Fontend/blob/master/public/Image/screen-search.png)
 ![Screenshot](https://github.com/Nasif4567/Brain-zone---E-learning---Student-Fontend/blob/master/public/Image/Screenshot%202024-05-04%20054145.png)
 
